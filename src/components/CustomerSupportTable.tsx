@@ -66,7 +66,12 @@ const statusColors = {
   closed: 'bg-muted text-muted-foreground'
 };
 
-export const CustomerSupportTable: React.FC = () => {
+interface CustomerSupportTableProps {
+  customerTickets?: any[];
+}
+
+export const CustomerSupportTable: React.FC<CustomerSupportTableProps> = ({ customerTickets = [] }) => {
+  const tickets = customerTickets.length > 0 ? customerTickets : mockSupportTickets;
   return (
     <Card className="shadow-card">
       <CardHeader>
@@ -86,7 +91,7 @@ export const CustomerSupportTable: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockSupportTickets.map((ticket) => (
+            {tickets.map((ticket) => (
               <TableRow key={ticket.id}>
                 <TableCell className="font-medium">{ticket.customerName}</TableCell>
                 <TableCell>{ticket.area}</TableCell>

@@ -9,10 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft, Mail } from 'lucide-react';
 
 interface ResetPasswordFormProps {
-  onToggleForm: (form: 'login' | 'reset') => void;
+  onBackToLogin?: () => void;
 }
 
-export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onToggleForm }) => {
+export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onBackToLogin }) => {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -28,22 +28,21 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onToggleFo
       return;
     }
 
-    const success = await resetPassword(email);
-    if (success) {
+    const result = await resetPassword(email);
+    if (result.success) {
       setIsSubmitted(true);
       toast({
         title: "Reset Link Sent",
         description: "Check your email for password reset instructions",
       });
     } else {
-      setError('Email address not found');
+      setError(result.error || 'Failed to send reset email');
     }
   };
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
-        <Card className="w-full max-w-md shadow-elegant">
+      <Card className="shadow-elegant">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-12 h-12 bg-success rounded-full flex items-center justify-center">
               <Mail className="w-6 h-6 text-success-foreground" />
@@ -54,23 +53,23 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onToggleFo
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={() => onToggleForm('login')} 
-              className="w-full"
-              variant="outline"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Sign In
-            </Button>
+            {onBackToLogin && (
+              <Button 
+                onClick={onBackToLogin} 
+                className="w-full"
+                variant="outline"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Sign In
+              </Button>
+            )}
           </CardContent>
         </Card>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
-      <Card className="w-full max-w-md shadow-elegant">
+    <Card className="shadow-elegant">
         <CardHeader className="text-center">
           <CardTitle className="text-xl font-bold">Reset Password</CardTitle>
           <CardDescription>
@@ -113,18 +112,19 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onToggleFo
             </Button>
           </form>
 
-          <div className="mt-4">
-            <Button 
-              onClick={() => onToggleForm('login')} 
-              variant="ghost" 
-              className="w-full"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Sign In
-            </Button>
-          </div>
+          {onBackToLogin && (
+            <div className="mt-4">
+              <Button 
+                onClick={onBackToLogin} 
+                variant="ghost" 
+                className="w-full"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Sign In
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
-    </div>
   );
 };

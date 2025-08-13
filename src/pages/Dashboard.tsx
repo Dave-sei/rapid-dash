@@ -9,6 +9,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Bug, TrendingUp, Users, Clock, Shield, Zap } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
+  const { user } = useAuth();
+  const { 
+    bugReports, 
+    customerTickets, 
+    developmentTickets, 
+    dashboardMetrics, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useDashboardData();
   const { toast } = useToast();
 
   const handleExportPdf = async () => {
@@ -26,6 +36,18 @@ export const Dashboard: React.FC = () => {
       });
     }
   };
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+
+  if (isLoading) {
+    return (
+      <DashboardLayout onExportPdf={handleExportPdf}>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout onExportPdf={handleExportPdf}>
@@ -121,10 +143,20 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Customer Support Table */}
-        <CustomerSupportTable />
+        <CustomerSupportTable customerTickets={customerTickets} />
 
         {/* Development Pipeline */}
         <DevelopmentPipeline />
+
+        {/* Admin Forms - Only show for admins */}
+        {isAdmin && (
+          <AdminForms 
+            onDataUpdate={refetch}
+            bugReports={bugReports}
+            customerTickets={customerTickets}
+            developmentTickets={developmentTickets}
+          />
+        )}
 
         {/* Footer Information */}
         <div className="bg-gradient-card rounded-lg p-6 border border-border">

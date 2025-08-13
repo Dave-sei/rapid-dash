@@ -9,10 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Shield } from 'lucide-react';
 
 interface LoginFormProps {
-  onToggleForm: (form: 'login' | 'reset') => void;
+  onSwitchToReset?: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToReset }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,9 +28,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm }) => {
       return;
     }
 
-    const success = await login(email, password);
-    if (!success) {
-      setError('Invalid email or password');
+    const result = await login(email, password);
+    if (!result.success) {
+      setError(result.error || 'Login failed');
     } else {
       toast({
         title: "Login Successful",
@@ -40,8 +40,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
-      <Card className="w-full max-w-md shadow-elegant">
+    <Card className="shadow-elegant">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
             <Shield className="w-6 h-6 text-primary-foreground" />
@@ -96,15 +95,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm }) => {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => onToggleForm('reset')}
-              className="text-sm text-primary hover:text-primary-glow transition-colors"
-            >
-              Forgot your password?
-            </button>
-          </div>
+          {onSwitchToReset && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={onSwitchToReset}
+                className="text-sm text-primary hover:text-primary-glow transition-colors"
+              >
+                Forgot your password?
+              </button>
+            </div>
+          )}
 
           <div className="mt-6 pt-4 border-t border-border">
             <div className="text-xs text-muted-foreground space-y-1">
@@ -116,7 +117,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm }) => {
             </div>
           </div>
         </CardContent>
-      </Card>
-    </div>
+    </Card>
   );
 };

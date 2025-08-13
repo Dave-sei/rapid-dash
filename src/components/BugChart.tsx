@@ -18,7 +18,11 @@ const weeklyProgressData = [
   { week: 'Current', bugsFixed: 286, newBugs: 52 }
 ];
 
-export const BugChart: React.FC = () => {
+interface BugChartProps {
+  bugReports?: any[];
+}
+
+export const BugChart: React.FC<BugChartProps> = ({ bugReports = [] }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="shadow-card">
