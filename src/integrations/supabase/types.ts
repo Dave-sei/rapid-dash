@@ -14,7 +14,234 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bug_reports: {
+        Row: {
+          assignee: string | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          priority: string
+          reporter: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee?: string | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          priority: string
+          reporter: string
+          status: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: string
+          reporter?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_support_tickets: {
+        Row: {
+          area: string
+          assignee: string | null
+          created_at: string
+          customer_name: string
+          description: string
+          eta: string | null
+          id: string
+          priority: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          area: string
+          assignee?: string | null
+          created_at?: string
+          customer_name: string
+          description: string
+          eta?: string | null
+          id?: string
+          priority: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          area?: string
+          assignee?: string | null
+          created_at?: string
+          customer_name?: string
+          description?: string
+          eta?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dashboard_metrics: {
+        Row: {
+          active_customer_support: number
+          blocker_bugs: number
+          created_at: string
+          critical_bugs: number
+          development_progress: number
+          high_priority_bugs: number
+          id: string
+          total_bugs_fixed: number
+          total_tickets_resolved: number
+          updated_at: string
+        }
+        Insert: {
+          active_customer_support?: number
+          blocker_bugs?: number
+          created_at?: string
+          critical_bugs?: number
+          development_progress?: number
+          high_priority_bugs?: number
+          id?: string
+          total_bugs_fixed?: number
+          total_tickets_resolved?: number
+          updated_at?: string
+        }
+        Update: {
+          active_customer_support?: number
+          blocker_bugs?: number
+          created_at?: string
+          critical_bugs?: number
+          development_progress?: number
+          high_priority_bugs?: number
+          id?: string
+          total_bugs_fixed?: number
+          total_tickets_resolved?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      development_tickets: {
+        Row: {
+          actual_hours: number | null
+          assignee: string | null
+          created_at: string
+          estimated_hours: number | null
+          id: string
+          priority: string
+          requested_by: string
+          status: string
+          ticket_id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          actual_hours?: number | null
+          assignee?: string | null
+          created_at?: string
+          estimated_hours?: number | null
+          id?: string
+          priority: string
+          requested_by: string
+          status: string
+          ticket_id: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          actual_hours?: number | null
+          assignee?: string | null
+          created_at?: string
+          estimated_hours?: number | null
+          id?: string
+          priority?: string
+          requested_by?: string
+          status?: string
+          ticket_id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      security_fixes: {
+        Row: {
+          affected_systems: string[]
+          created_at: string
+          estimated_completion: string | null
+          fix_description: string
+          id: string
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affected_systems: string[]
+          created_at?: string
+          estimated_completion?: string | null
+          fix_description: string
+          id?: string
+          severity: string
+          status: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affected_systems?: string[]
+          created_at?: string
+          estimated_completion?: string | null
+          fix_description?: string
+          id?: string
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
