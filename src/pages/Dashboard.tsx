@@ -22,6 +22,7 @@ export const Dashboard: React.FC = () => {
     customerTickets,
     developmentTickets,
     dashboardMetrics,
+    widgetContent,
     isLoading: isDataLoading,
     error,
     refetch,
@@ -159,6 +160,7 @@ export const Dashboard: React.FC = () => {
                     customerTickets,
                     developmentTickets,
                     dashboardMetrics,
+                    widgetContent,
                   }}
                 />
               </div>
@@ -217,6 +219,7 @@ export const Dashboard: React.FC = () => {
                 bugReports={bugReports}
                 customerTickets={customerTickets}
                 developmentTickets={developmentTickets}
+                widgetContent={widgetContent}
               />
             </CardContent>
           </Card>

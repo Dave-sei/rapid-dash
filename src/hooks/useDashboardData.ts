@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BugReport, CustomerSupportTicket, DevelopmentTicket, SecurityFix, DashboardMetrics, DashboardLayout, WidgetConfig } from '@/types/dashboard';
+import { WidgetContent } from '@/types/widgetContent';
 import { useAuth } from '@/contexts/AuthContext'; // Import useAuth to get user ID
 
 // Default dashboard layout if no custom layout is found
@@ -155,6 +156,7 @@ export const useDashboardData = () => {
   const [securityFixes, setSecurityFixes] = useState<SecurityFix[]>([]);
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout | null>(null);
+  const [widgetContent, setWidgetContent] = useState<WidgetContent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -202,13 +204,15 @@ export const useDashboardData = () => {
         customerTicketsRes,
         developmentTicketsRes,
         securityFixesRes,
-        metricsRes
+        metricsRes,
+        widgetContentRes
       ] = await Promise.all([
         supabase.from('bug_reports').select('*').order('created_at', { ascending: false }),
         supabase.from('customer_support_tickets').select('*').order('created_at', { ascending: false }),
         supabase.from('development_tickets').select('*').order('created_at', { ascending: false }),
         supabase.from('security_fixes').select('*').order('created_at', { ascending: false }),
-        supabase.from('dashboard_metrics').select('*').order('created_at', { ascending: false }).limit(1)
+        supabase.from('dashboard_metrics').select('*').order('created_at', { ascending: false }).limit(1),
+        supabase.from('widget_content').select('*').order('created_at', { ascending: false })
       ]);
 
       if (bugReportsRes.error) throw bugReportsRes.error;
@@ -216,6 +220,7 @@ export const useDashboardData = () => {
       if (developmentTicketsRes.error) throw developmentTicketsRes.error;
       if (securityFixesRes.error) throw securityFixesRes.error;
       if (metricsRes.error) throw metricsRes.error;
+      if (widgetContentRes.error) throw widgetContentRes.error;
 
       setBugReports(bugReportsRes.data.map(bug => ({
         id: bug.id,
@@ -270,6 +275,18 @@ export const useDashboardData = () => {
         updatedAt: new Date(fix.updated_at)
       })));
 
+      setWidgetContent(widgetContentRes.data.map(content => ({
+        id: content.id,
+        title: content.title,
+        description: content.description,
+        content: content.content,
+        imageUrl: content.image_url,
+        widgetType: content.widget_type as 'content' | 'image' | 'announcement' | 'progress' | 'stats',
+        metadata: content.metadata || {},
+        createdAt: new Date(content.created_at),
+        updatedAt: new Date(content.updated_at)
+      })));
+
       if (metricsRes.data.length > 0) {
         const metrics = metricsRes.data[0];
         setDashboardMetrics({
@@ -303,6 +320,7 @@ export const useDashboardData = () => {
     developmentTickets,
     securityFixes,
     dashboardMetrics,
+    widgetContent,
     isLoading,
     error,
     refetch: fetchData
