@@ -99,7 +99,7 @@ export const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
       id: 'metric-functional-stability',
       component: 'MetricCard',
       title: 'Functional Stability',
-      value: '91%',
+      
       description: 'Webstore, DAM, Tenant issues',
       props: {
         icon: 'Zap',
@@ -111,7 +111,7 @@ export const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
       id: 'metric-performance',
       component: 'MetricCard',
       title: 'Performance',
-      value: '4%',
+      
       description: 'Cart checkout slowness',
       props: {
         icon: 'TrendingUp',
@@ -123,7 +123,7 @@ export const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
       id: 'metric-queries',
       component: 'MetricCard',
       title: 'Queries',
-      value: '3%',
+      
       description: 'Checkout & font issues',
       props: {
         icon: 'Bug',
@@ -135,7 +135,7 @@ export const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
       id: 'metric-look-feel',
       component: 'MetricCard',
       title: 'Look & Feel',
-      value: '2%',
+      
       description: 'UI & display issues',
       props: {
         icon: 'Shield',

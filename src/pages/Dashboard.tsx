@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { generatePDF } from '@/utils/pdfExport';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, AlertCircle, Settings, Plus, LayoutTemplate } from 'lucide-react';
+import { Loader2, AlertCircle, Settings, Plus, LayoutTemplate, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardData, DEFAULT_DASHBOARD_LAYOUT } from '@/hooks/useDashboardData';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
