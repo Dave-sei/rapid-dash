@@ -148,7 +148,7 @@ export const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
 
 
 export const useDashboardData = () => {
-  const { user } = useAuth();
+  const { user, isInitialized } = useAuth();
   const [bugReports, setBugReports] = useState<BugReport[]>([]);
   const [customerTickets, setCustomerTickets] = useState<CustomerSupportTicket[]>([]);
   const [developmentTickets, setDevelopmentTickets] = useState<DevelopmentTicket[]>([]);
@@ -290,10 +290,11 @@ export const useDashboardData = () => {
   };
 
   useEffect(() => {
-    if (user !== undefined) {
+    // Only fetch data when user is loaded and auth is initialized
+    if (isInitialized && user !== undefined) {
       fetchData();
     }
-  }, [user]);
+  }, [user?.id, isInitialized]); // Only depend on user.id and isInitialized
 
   return {
     dashboardLayout,
