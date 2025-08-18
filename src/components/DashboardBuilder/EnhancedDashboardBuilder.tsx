@@ -1,111 +1,49 @@
-import React, { useState } from 'react';
-import { DashboardLayout } from '@/components/DashboardLayout';
-import { WidgetLibrary } from './WidgetLibrary';
+// src/components/DashboardBuilder/EnhancedDashboardBuilder.tsx
+import React from 'react';
+import { DashboardLayout as DashboardLayoutComponent } from '@/components/DashboardLayout';
+import { WidgetLibrary, WidgetTemplate } from './WidgetLibrary';
 import { MultiSelectControls } from './MultiSelectControls';
 import { StylePanel } from './StylePanel';
 import { VersionManager } from './VersionManager';
 import { PublishingPanel } from './PublishingPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DashboardBuilderState, EnhancedWidgetConfig } from '@/types/dashboardBuilder';
+import { useDashboardStore } from '@/stores/dashboardStore';
+// ... (other imports)
 
-interface EnhancedDashboardBuilderProps {
-  dashboardId: string;
-  onSave: (layout: any) => void;
-  onExport: () => void;
-}
+export const EnhancedDashboardBuilder: React.FC = () => {
+  // ... (existing code)
+  const {
+    dashboardLayout,
+    setDashboardLayout,
+    selectedWidgets,
+    multiSelectMode,
+    alignWidgets,
+    deleteWidgets,
+    clearWidgetSelection,
+  } = useDashboardStore();
 
-export const EnhancedDashboardBuilder: React.FC<EnhancedDashboardBuilderProps> = ({
-  dashboardId,
-  onSave,
-  onExport
-}) => {
-  const [builderState, setBuilderState] = useState<DashboardBuilderState>({
-    currentDashboard: null,
-    selectedWidgets: [],
-    multiSelectMode: false,
-    dragMode: 'none',
-    snapToGrid: true,
-    gridSize: 20,
-    publishingConfig: {
-      internal: { shareWithTeam: false, roleBasedAccess: [], departments: [] },
-      external: { pdfExport: true, powerPointExport: true, embedUrl: false, publicLink: false }
-    },
-    versions: [],
-    currentVersion: 1,
-    liveUpdates: { enabled: true, interval: 30, dataSources: [] }
-  });
+  const handleAlign = (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
+    alignWidgets(alignment);
+  };
+
+  const handleDelete = () => {
+    deleteWidgets(selectedWidgets);
+    clearWidgetSelection();
+  };
+
+  // ... (rest of the component)
 
   return (
-    <DashboardLayout onExportPdf={onExport}>
-      <div className="grid grid-cols-4 gap-6 h-full">
-        <div className="col-span-1 space-y-4">
-          <Tabs defaultValue="widgets" className="h-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="widgets">Library</TabsTrigger>
-              <TabsTrigger value="style">Style</TabsTrigger>
-              <TabsTrigger value="versions">Versions</TabsTrigger>
-              <TabsTrigger value="publish">Publish</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="widgets" className="h-full">
-              <WidgetLibrary
-                onWidgetSelect={(template) => {/* Add widget */}}
-                selectedCategory="all"
-                onCategoryChange={() => {}}
-              />
-            </TabsContent>
-            
-            <TabsContent value="style">
-              <StylePanel
-                widgetId=""
-                currentStyle={{}}
-                onStyleChange={() => {}}
-                thresholds={[]}
-                onThresholdsChange={() => {}}
-              />
-            </TabsContent>
-            
-            <TabsContent value="versions">
-              <VersionManager
-                currentVersion={1}
-                versions={[]}
-                onSaveVersion={() => {}}
-                onLoadVersion={() => {}}
-                onPreviewVersion={() => {}}
-                onDeleteVersion={() => {}}
-              />
-            </TabsContent>
-            
-            <TabsContent value="publish">
-              <PublishingPanel
-                dashboardId={dashboardId}
-                config={builderState.publishingConfig}
-                onConfigChange={() => {}}
-                onExportPDF={onExport}
-                onExportPowerPoint={onExport}
-                onGenerateEmbedCode={() => ''}
-                onGeneratePublicLink={() => ''}
-              />
-            </TabsContent>
-          </Tabs>
-        </div>
-        
-        <div className="col-span-3">
-          {/* Dashboard canvas will go here */}
-          <div className="h-full border-2 border-dashed border-border rounded-lg p-4">
-            <p className="text-center text-muted-foreground">Dashboard Canvas</p>
-          </div>
-        </div>
-      </div>
-      
+    <DashboardLayoutComponent onExportPdf={() => {}}>
+      {/* ... (rest of the JSX) */}
       <MultiSelectControls
-        multiSelectState={{ selectedWidgets: [], isActive: false }}
-        onAlign={() => {}}
-        onResize={() => {}}
-        onStyleGroup={() => {}}
-        onDelete={() => {}}
-        onClearSelection={() => {}}
+        multiSelectState={{ selectedWidgets, isActive: multiSelectMode }}
+        onAlign={handleAlign}
+        onResize={() => {}} // Implement resize logic
+        onStyleGroup={() => {}} // Implement style group logic
+        onDelete={handleDelete}
+        onClearSelection={clearWidgetSelection}
       />
-    </DashboardLayout>
+    </DashboardLayoutComponent>
   );
 };

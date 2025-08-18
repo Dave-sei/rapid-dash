@@ -1,5 +1,3 @@
-// src/contexts/AuthContext.tsx
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
@@ -23,55 +21,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const handleUserSession = async (session: Session | null) => {
-      if (session?.user) {
-        try {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .single();
+    const fetchAndSetUserProfile = async (supabaseUser: SupabaseUser | null) => {
+      if (!supabaseUser) {
+        setUser(null);
+        setIsLoading(false);
+        if (!isInitialized) setIsInitialized(true);
+        return;
+      }
 
-          if (error) {
-            console.error('Error fetching user profile:', error);
-            setUser(null);
-          } else {
-            setUser({
-              id: profile.user_id,
-              email: profile.email,
-              role: profile.role as 'super_admin' | 'admin' | 'viewer',
-              name: profile.name
-            });
-          }
-        } catch (err) {
-          console.error('Error fetching user profile:', err);
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', supabaseUser.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          setUser(null);
+        } else if (profile) {
+          setUser({
+            id: profile.user_id,
+            email: profile.email,
+            role: profile.role as 'super_admin' | 'admin' | 'viewer',
+            name: profile.name,
+          });
+        } else {
           setUser(null);
         }
-      } else {
+      } catch (err) {
         setUser(null);
+      } finally {
+        setIsLoading(false);
+        if (!isInitialized) setIsInitialized(true);
       }
-      if (!isInitialized) setIsInitialized(true);
-      setIsLoading(false);
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleUserSession(session);
-    });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        setIsLoading(true);
-      }
-      await handleUserSession(session);
+      setIsLoading(true);
+      await fetchAndSetUserProfile(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    // Initial check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        fetchAndSetUserProfile(session?.user ?? null);
+    });
+
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [isInitialized]);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { success: !error, error: error?.message };
+    if (error) {
+        setIsLoading(false);
+        return { success: false, error: error.message };
+    }
+    return { success: true };
   };
 
   const signup = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
@@ -80,8 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: redirectUrl, data: { name } }
+      options: { emailRedirectTo: redirectUrl, data: { name } },
     });
+    setIsLoading(false);
     return { success: !error, error: error?.message };
   };
 
