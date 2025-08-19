@@ -10,7 +10,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   isLoading: boolean;
-  isInitialized: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,68 +17,56 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<DashboardUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const fetchAndSetUserProfile = async (supabaseUser: SupabaseUser | null) => {
-      if (!supabaseUser) {
-        setUser(null);
-        setIsLoading(false);
-        if (!isInitialized) setIsInitialized(true);
-        return;
-      }
+    const handleUserSession = async (session: Session | null) => {
+      if (session?.user) {
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
 
-      try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', supabaseUser.id)
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          setUser(null);
-        } else if (profile) {
-          setUser({
-            id: profile.user_id,
-            email: profile.email,
-            role: profile.role as 'super_admin' | 'admin' | 'viewer',
-            name: profile.name,
-          });
-        } else {
+          if (error) {
+            console.error('Error fetching user profile:', error);
+            setUser(null);
+          } else {
+            setUser({
+              id: session.user.id, // Corrected: Use the ID from the auth session
+              email: profile.email,
+              role: profile.role as 'super_admin' | 'admin' | 'viewer',
+              name: profile.name
+            });
+          }
+        } catch (err) {
+          console.error('Error fetching user profile:', err);
           setUser(null);
         }
-      } catch (err) {
+      } else {
         setUser(null);
-      } finally {
-        setIsLoading(false);
-        if (!isInitialized) setIsInitialized(true);
       }
+      setIsLoading(false);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setIsLoading(true);
-      await fetchAndSetUserProfile(session?.user ?? null);
+      await handleUserSession(session);
     });
-
-    // Initial check
+    
+    // Initial check on component mount
     supabase.auth.getSession().then(({ data: { session } }) => {
-        fetchAndSetUserProfile(session?.user ?? null);
+      handleUserSession(session);
     });
 
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [isInitialized]);
+    return () => subscription.unsubscribe();
+  }, []);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-        setIsLoading(false);
-        return { success: false, error: error.message };
-    }
-    return { success: true };
+    setIsLoading(false);
+    return { success: !error, error: error?.message };
   };
 
   const signup = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
@@ -88,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: redirectUrl, data: { name } },
+      options: { emailRedirectTo: redirectUrl, data: { name } }
     });
     setIsLoading(false);
     return { success: !error, error: error?.message };
@@ -109,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, resetPassword, isLoading, isInitialized }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, resetPassword, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

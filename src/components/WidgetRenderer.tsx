@@ -1,72 +1,82 @@
-// src/components/WidgetRenderer.tsx
-import React, { lazy, Suspense, useState } from 'react';
-import { WidgetConfig } from '@/types/dashboard';
+import React from 'react';
+import { MetricCard } from './MetricCard';
+import { BugChart } from './BugChart';
+import { CustomerSupportTable } from './CustomerSupportTable';
+import { DevelopmentPipeline } from './DevelopmentPipeline';
+import { WidgetConfig, BugReport, CustomerSupportTicket, DevelopmentTicket, DashboardMetrics } from '@/types/dashboard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, MessageSquare } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { WidgetDetailModal } from './WidgetDetailModal';
-import { EditableText } from './EditableText';
-import { useDashboardStore } from '@/stores/dashboardStore';
-import { Button } from '@/components/ui/button';
-import { WidgetComments } from './WidgetComments';
+import { AlertCircle } from 'lucide-react';
 
-// (Lazy-loaded components remain the same)
+// Map string icon names to LucideReact components
+import { Bug, TrendingUp, Users, Clock, Shield, Zap } from 'lucide-react';
+const LucideIcons = { Bug, TrendingUp, Users, Clock, Shield, Zap };
 
 interface WidgetRendererProps {
   config: WidgetConfig;
-  data: any;
-  isLoading: boolean;
-  isEditable: boolean;
+  data: {
+    bugReports: BugReport[];
+    customerTickets: CustomerSupportTicket[];
+    developmentTickets: DevelopmentTicket[];
+    dashboardMetrics: DashboardMetrics | null;
+  };
 }
 
-export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ config, data, isLoading, isEditable }) => {
-  const [isDetailModalOpen, setDetailModalOpen] = useState(false);
-  const [isCommentsOpen, setCommentsOpen] = useState(false);
-  const { updateWidget } = useDashboardStore();
+export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ config, data }) => {
+  const { component, title, description, props } = config;
 
-  const handleTitleSave = (newTitle: string) => {
-    updateWidget({ ...config, title: newTitle });
+  // Render a generic card wrapper for all widgets to maintain consistent styling
+  // and provide a title/description from the widget config.
+  const renderWidgetContent = () => {
+    switch (component) {
+      case 'MetricCard':
+        // MetricCard requires specific data from dashboardMetrics
+        const metricValue = data.dashboardMetrics ? data.dashboardMetrics[props.valueKey as keyof DashboardMetrics] : props.value;
+        const IconComponent = props.icon ? LucideIcons[props.icon as keyof typeof LucideIcons] : undefined;
+        return (
+          <MetricCard
+            title={title}
+            value={metricValue || 0} // Use fetched value or default to 0
+            change={props.change}
+            icon={IconComponent}
+            description={description}
+            priority={props.priority}
+          />
+        );
+      case 'BugChart':
+        return <BugChart bugReports={data.bugReports} />;
+      case 'CustomerSupportTable':
+        return <CustomerSupportTable customerTickets={data.customerTickets} />;
+      case 'DevelopmentPipeline':
+        return <DevelopmentPipeline developmentTickets={data.developmentTickets} />;
+      default:
+        return (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Unknown widget type: {component}
+            </AlertDescription>
+          </Alert>
+        );
+    }
   };
 
-  const handleDescriptionSave = (newDescription: string) => {
-    updateWidget({ ...config, description: newDescription });
-  };
-
-  if (isLoading) {
-    return <Skeleton className="h-full w-full" />;
+  // For MetricCard, we render it directly as it's already a Card component.
+  // For other widgets, we wrap them in a Card to ensure consistent styling.
+  if (component === 'MetricCard') {
+    return renderWidgetContent();
   }
 
-  const renderWidgetContent = () => {
-    // ... (rest of the switch statement for rendering widgets)
-  };
-
   return (
-    <Card className="shadow-card h-full flex flex-col group/widget">
-      <CardHeader className="flex-row items-center justify-between">
-        <div>
-          <CardTitle>
-            <EditableText initialValue={config.title} onSave={handleTitleSave} isEditable={isEditable} />
-          </CardTitle>
-          {config.description && (
-            <CardDescription>
-              <EditableText initialValue={config.description} onSave={handleDescriptionSave} isEditable={isEditable} as="textarea" />
-            </CardDescription>
-          )}
-        </div>
-        <div className="opacity-0 group-hover/widget:opacity-100 transition-opacity">
-          <Button variant="ghost" size="sm" onClick={() => setCommentsOpen(true)}>
-            <MessageSquare className="h-4 w-4" />
-          </Button>
-        </div>
+    <Card className="shadow-card">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
-      <CardContent className="flex-grow" onClick={() => !isEditable && setDetailModalOpen(true)}>
-        <Suspense fallback={<Skeleton className="h-full w-full" />}>
-          {renderWidgetContent()}
-        </Suspense>
+      <CardContent>
+        {renderWidgetContent()}
       </CardContent>
-      <WidgetDetailModal isOpen={isDetailModalOpen} onClose={() => setDetailModalOpen(false)} widget={config} data={data} />
-      <WidgetComments isOpen={isCommentsOpen} onClose={() => setCommentsOpen(false)} widgetId={config.id} />
     </Card>
   );
 };
