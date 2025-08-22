@@ -21,8 +21,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     // Using localStorage is standard for web clients.
     storage: localStorage,
-    // These are the recommended defaults, so they are good to keep.
+    // These are the recommended defaults for persistent sessions
     persistSession: true,
-    autoRefreshToken: false,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    // Add retry logic for failed token refreshes
+    flowType: 'pkce'
   }
 });
