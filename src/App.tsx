@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import { Auth } from "./pages/Auth";
 import { Dashboard } from "./pages/Dashboard";
 import { WidgetEditorPage } from "./pages/WidgetEditorPage"; // Import the new page
+import { DashboardEditor } from "./pages/DashboardEditor";
+import { PublicDashboard } from "./pages/PublicDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,12 @@ const App = () => (
                 <WidgetEditorPage />
               </ProtectedRoute>
             } />
+            <Route path="/editor" element={
+              <ProtectedRoute>
+                <DashboardEditor />
+              </ProtectedRoute>
+            } />
+            <Route path="/public/:shareKey" element={<PublicDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
